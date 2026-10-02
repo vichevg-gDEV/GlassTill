@@ -443,34 +443,38 @@ export const POSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const { type, payload } = event.data;
       setSyncStatus('syncing');
 
-      if (type === 'TABLE_UPDATE') {
-        setTables(payload);
-        localStorage.setItem(STORAGE_KEYS.TABLES, JSON.stringify(payload));
-      } else if (type === 'PRODUCT_UPDATE') {
-        setProducts(payload);
-        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(payload));
-      } else if (type === 'MENU_CATEGORIES_UPDATE') {
-        setCategories(payload);
-        localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(payload));
-      } else if (type === 'SETTINGS_UPDATE') {
-        setSettings(payload);
-        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(payload));
-      } else if (type === 'ORDER_COMPLETE') {
-        setOrdersHistory(prev => [payload, ...prev]);
-      } else if (type === 'STATION_TICKETS_UPDATE') {
-        setStationTickets(payload);
-        localStorage.setItem(STORAGE_KEYS.STATION_TICKETS, JSON.stringify(payload));
-      } else if (type === 'OPEN_ORDERS_UPDATE') {
-        setOpenOrders(payload);
-        localStorage.setItem(STORAGE_KEYS.OPEN_ORDERS, JSON.stringify(payload));
-      } else if (type === 'STATION_REPLY_NOTICE') {
-        playAudioFeedback('bell');
-        setLastSubmissionNotice({
-          text: payload.message || 'Station update received',
-          foodCount: 0,
-          drinkCount: 0,
-          timestamp: Date.now(),
-        });
+      try {
+        if (type === 'TABLE_UPDATE') {
+          setTables(payload);
+          localStorage.setItem(STORAGE_KEYS.TABLES, JSON.stringify(payload));
+        } else if (type === 'PRODUCT_UPDATE') {
+          setProducts(payload);
+          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(payload));
+        } else if (type === 'MENU_CATEGORIES_UPDATE') {
+          setCategories(payload);
+          localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(payload));
+        } else if (type === 'SETTINGS_UPDATE') {
+          setSettings(payload);
+          localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(payload));
+        } else if (type === 'ORDER_COMPLETE') {
+          setOrdersHistory(prev => [payload, ...prev]);
+        } else if (type === 'STATION_TICKETS_UPDATE') {
+          setStationTickets(payload);
+          localStorage.setItem(STORAGE_KEYS.STATION_TICKETS, JSON.stringify(payload));
+        } else if (type === 'OPEN_ORDERS_UPDATE') {
+          setOpenOrders(payload);
+          localStorage.setItem(STORAGE_KEYS.OPEN_ORDERS, JSON.stringify(payload));
+        } else if (type === 'STATION_REPLY_NOTICE') {
+          playAudioFeedback('bell');
+          setLastSubmissionNotice({
+            text: payload.message || 'Station update received',
+            foodCount: 0,
+            drinkCount: 0,
+            timestamp: Date.now(),
+          });
+        }
+      } catch (e) {
+        console.warn('Storage sync error:', e);
       }
 
       setTimeout(() => setSyncStatus('synced'), 150);
@@ -545,37 +549,46 @@ export const POSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [currentUser, settings.autoLockSeconds, playAudioFeedback]);
 
+  // Safe helper to write to localStorage
+  const safeSave = (key: string, data: any) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+      console.warn(`Failed to persist ${key}:`, e);
+    }
+  };
+
   // Save changes to localStorage
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.PROFILES, JSON.stringify(profiles));
+    safeSave(STORAGE_KEYS.PROFILES, profiles);
   }, [profiles]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    safeSave(STORAGE_KEYS.CATEGORIES, categories);
   }, [categories]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+    safeSave(STORAGE_KEYS.PRODUCTS, products);
   }, [products]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.TABLES, JSON.stringify(tables));
+    safeSave(STORAGE_KEYS.TABLES, tables);
   }, [tables]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+    safeSave(STORAGE_KEYS.SETTINGS, settings);
   }, [settings]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(ordersHistory));
+    safeSave(STORAGE_KEYS.ORDERS, ordersHistory);
   }, [ordersHistory]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.OPEN_ORDERS, JSON.stringify(openOrders));
+    safeSave(STORAGE_KEYS.OPEN_ORDERS, openOrders);
   }, [openOrders]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.STATION_TICKETS, JSON.stringify(stationTickets));
+    safeSave(STORAGE_KEYS.STATION_TICKETS, stationTickets);
   }, [stationTickets]);
 
   // Helper to determine destination station
