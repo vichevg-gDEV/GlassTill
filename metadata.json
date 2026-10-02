@@ -1,0 +1,7 @@
+{
+  "name": "LumaTill",
+  "description": "A minimalist, frosted-glass POS & CRM (LumaTill) designed for high-volume hospitality environments with PIN authentication, interactive floor map, dynamic category & subcategory management, live KDS station dispatch for Kitchen & Bar, and real-time reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
